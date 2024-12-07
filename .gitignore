@@ -1,0 +1,6 @@
+*test*
+!/static/.gitkeep
+
+# 执行文件
+bin/*
+MediaWarp*

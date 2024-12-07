@@ -1,0 +1,22 @@
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx.Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - jellyseerr
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    ports:
+      - "5055:5055"
+    volumes:
+      - app:/app/config
+    restart: unless-stopped
+
+volumes:
+  app:
+    external: true

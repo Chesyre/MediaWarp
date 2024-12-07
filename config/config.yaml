@@ -1,0 +1,60 @@
+Port: 9000                                  # MideWarp监听端口
+
+MeidaServer:                                # 媒体服务器相关设置
+  TYPE: Emby                                # 媒体服务器类型
+  ADDR: http://host.docker.internal:8096    # 媒体服务器地址
+  AUTH: "5e71c223b6124f99b05be8c570adfa6f"                                  # 认证方式：APIKey；获取方式：Emby控制台 -> 高级 -> API密钥
+
+Cache:                                      # 缓存设置
+  Type: Memory                              # 缓存类型（可选项：Memory内存缓存）
+
+Logger:                                     # 日志设定
+  AccessLogger:                             # 访问日志设定
+    Console: True                           # 是否将访问日志文件输出到终端中
+    File: False                             # 是否将访问日志文件记录到文件中
+  ServiceLogger:                            # 服务日志设定
+    Console: True                           # 是否将服务日志文件输出到终端中
+    File: True                              # 是否将服务日志文件记录到文件中
+
+Web:                                        # Web页面修改相关设置
+  Enable: True                              # 总开关
+  Static: True                              # 是否加载自定义静态资源
+  Index: False                              # 是否从static目录读取index.html文件 
+  Head: |                                   # 是否添加自定义字段到index.html的HEAD中
+    <script src="/MediaWarp/static/embedded/js/quazar/main.js"></script>
+
+  ExternalPlayerUrl: false                   # 是否开启外置播放器
+  ActorPlus: True                           # 过滤没有头像的演员和制作人员
+  FanartShow: false                         # 显示同人图（fanart图）
+  Danmaku: false                             # Web显示弹幕
+  BeautifyCSS: True                         # Emby美化CSS样式
+
+ClientFilter:                               # 客户端过滤器
+  Enable: False                             # 是否启用客户端过滤器
+  Mode: BlackList # WhileList / BlackList   # 黑白名单模式
+  ClientList:                               # 名单列表
+    - Fileball
+    - Infuse
+
+# 302重定向相关配置
+
+HTTPStrm: 
+  Enable: false                              # 是否开启HttpStrm重定向
+  PrefixList:                               # EmbyServer中Strm文件的前缀（符合该前缀的Strm文件且被正确识别为http协议都会路由到该规则下）
+    - /media/strm/http
+    - /media/strm/https
+
+AlistStrm:                                  # AlistStrm相关配置（Strm文件内容是Alist上文件的路径，目前仅支持适配Alist V3）
+  Enable: false                              # 是否启用AlistStrm重定向
+  List:                                     # Alist服务关配置列表
+    - ADDR: http://192.168.1.100:5244       # Alist服务器地址（MediaWarp可以正常访问到就可以）
+      Username: admin                       # Alist服务器账号
+      Password: adminadmin                  # Alist服务器密码
+      PrefixList:                           # EmbyServer中Strm文件的前缀（符合该前缀的Strm文件都会路由到该规则下）
+        - /media/strm/MyAlist               # 同一个Alist可以有多个前缀规则
+        - /mnt/cd2/strm
+    - ADDR: https://xiaoya.com              # 可以填写多个配置
+      Username: admin
+      Password: adminadmin
+      PrefixList: 
+        - /media/strm
