@@ -29,7 +29,7 @@ export const Modal = {
                     <div class="filter-container">
                         <label>
                             <input type="checkbox" id="hideAvailable">
-                            Masquer les médias disponibles
+                            Masquer les médias disponibles et demandés
                         </label>
                     </div>
                 </div>
@@ -56,16 +56,21 @@ export const Modal = {
             return;
         }
 
-        const filteredResults = hideAvailable ? results.filter(result => result.status !== MediaStatus.AVAILABLE) : results;
+        const filteredResults = hideAvailable ? results.filter(result => 
+            result.status !== MediaStatus.AVAILABLE && 
+            result.status !== MediaStatus.PENDING
+        ) : results;
         
         if (filteredResults.length === 0) {
-            container.innerHTML = '<p class="no-results">Tous les médias sont déjà disponibles</p>';
+            container.innerHTML = '<p class="no-results">Tous les médias sont déjà disponibles ou demandés</p>';
             return;
         }
 
         filteredResults.forEach(result => {
             const resultElement = document.createElement('div');
             resultElement.className = 'result-item';
+            resultElement.setAttribute('data-id', result.id);
+            resultElement.setAttribute('data-type', result.mediaType);
             
             const mediaTypeLabel = this.getMediaTypeLabel(result.mediaType);
             const year = result.year ? ` (${result.year})` : '';
@@ -94,6 +99,28 @@ export const Modal = {
 
             container.appendChild(resultElement);
         });
+    },
+
+    async updateMediaStatus(mediaId, mediaType, resultElement) {
+        try {
+            const status = await MediaAPI.getMediaStatus(mediaId, mediaType);
+            const statusDetails = MediaAPI.getStatusDetails(status);
+            
+            const statusBadge = resultElement.querySelector('.status-badge');
+            const requestButton = resultElement.querySelector('.request-button');
+            
+            statusBadge.className = `status-badge ${statusDetails.class}`;
+            statusBadge.textContent = statusDetails.label;
+            
+            if (!statusDetails.requestable && requestButton) {
+                requestButton.remove();
+            }
+            
+            return status;
+        } catch (error) {
+            console.error('Erreur lors de la mise à jour du statut:', error);
+            return null;
+        }
     },
 
     bindEvents() {
@@ -128,16 +155,24 @@ export const Modal = {
                 const button = e.target;
                 const mediaId = button.dataset.id;
                 const mediaType = button.dataset.type;
+                const resultElement = button.closest('.result-item');
                 
                 try {
                     button.disabled = true;
                     button.textContent = 'Envoi...';
                     
                     await MediaAPI.requestMedia(mediaId, mediaType);
-                    
                     this.showNotification('Demande envoyée avec succès !', 'success');
-                    button.textContent = 'Demandé';
-                    button.style.backgroundColor = '#f39c12';
+                    
+                    // Update the media status immediately after the request
+                    const newStatus = await this.updateMediaStatus(mediaId, mediaType, resultElement);
+                    
+                    // If hiding available/requested media is enabled, remove the item
+                    if (hideAvailableCheckbox.checked && 
+                        (newStatus === MediaStatus.AVAILABLE || newStatus === MediaStatus.PENDING)) {
+                        resultElement.remove();
+                    }
+                    
                 } catch (error) {
                     this.showNotification(error.message, 'error');
                     button.disabled = false;
