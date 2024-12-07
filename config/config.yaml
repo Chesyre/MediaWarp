@@ -22,12 +22,13 @@ Web:                                        # Web页面修改相关设置
   Index: False                              # 是否从static目录读取index.html文件 
   Head: |                                   # 是否添加自定义字段到index.html的HEAD中
     <script src="/MediaWarp/static/embedded/js/quazar/main.js"></script>
+    <link rel="stylesheet" href="/MediaWarp/static/embedded/css/quazar.css" type="text/css" media="all" />
 
   ExternalPlayerUrl: false                   # 是否开启外置播放器
   ActorPlus: True                           # 过滤没有头像的演员和制作人员
   FanartShow: false                         # 显示同人图（fanart图）
   Danmaku: false                             # Web显示弹幕
-  BeautifyCSS: True                         # Emby美化CSS样式
+  BeautifyCSS: false                         # Emby美化CSS样式
 
 ClientFilter:                               # 客户端过滤器
   Enable: False                             # 是否启用客户端过滤器

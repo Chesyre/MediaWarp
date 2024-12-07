@@ -1,154 +1,156 @@
+import { CONFIG } from '../config/config.js';
+import { ApiClient } from '../api/apiClient.js';
+import { createModal } from '../ui/modal.js';
+import { showNotification } from '../ui/notifications.js';
+
 export const ReportButton = {
-    init() {
-        this.injectButton();
-        this.bindEvents();
+    async getCurrentItemInfo() {
+        try {
+            const userId = window.ApiClient._serverInfo.UserId;
+            const itemId = /\?id=([A-Za-z0-9]+)/.exec(window.location.hash)?.[1];
+            if (!itemId) return null;
+
+            const item = await window.ApiClient.getItem(userId, itemId);
+            const userInfo = await window.ApiClient.getUser(userId);
+            const tmdbId = item.ProviderIds?.Tmdb || item.ProviderIds?.tmdb;
+            
+            if (!tmdbId) return null;
+
+            const endpoint = item.Type === 'Series' ? `/tv/${tmdbId}` : `/movie/${tmdbId}`;
+            const jellyseerrResponse = await ApiClient.makeRequest(endpoint);
+            
+            return {
+                title: item.Name,
+                username: userInfo?.Name || 'Utilisateur inconnu',
+                mediaId: jellyseerrResponse?.mediaInfo?.id
+            };
+        } catch (error) {
+            console.error('Error getting item info:', error);
+            return null;
+        }
     },
 
-    injectButton() {
-        // Find the directors container
-        const directorsContainer = document.querySelector('.directors');
-        if (!directorsContainer) return;
+    async handleReportClick() {
+        const itemInfo = await this.getCurrentItemInfo();
+        if (!itemInfo) {
+            showNotification('Erreur lors de la récupération des informations du média', 'error');
+            return;
+        }
 
-        // Create and insert the report button after the directors container
-        const reportButton = document.createElement('div');
-        reportButton.className = 'verticalFieldItem report-button-container focuscontainer-x';
-        reportButton.innerHTML = `
-            <button is="emby-button" 
-                    type="button" 
-                    class="button-link report-problem-button emby-button"
-                    style="color: #ff5252;">
-                <i class="md-icon" style="margin-right: 0.5em;">error_outline</i>
-                Signaler un problème
-            </button>
-        `;
-
-        directorsContainer.insertAdjacentElement('afterend', reportButton);
-    },
-
-    bindEvents() {
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('.report-problem-button')) {
-                this.handleReportClick();
-            }
-        });
-    },
-
-    handleReportClick() {
-        // Get current media info
-        const titleElement = document.querySelector('.itemName-primary');
-        const title = titleElement ? titleElement.textContent : 'Unknown Title';
-
-        // Create modal content
-        const modalContent = `
-            <div class="report-modal-content" style="padding: 2em;">
-                <h2 style="margin-bottom: 1em;">Signaler un problème</h2>
+        createModal({
+            title: 'Signaler un problème',
+            content: `
                 <div style="margin-bottom: 1.5em;">
-                    <div style="margin-bottom: 0.5em;">Média: ${title}</div>
+                    <h3 style="color: white; font-size: 1.2em; margin: 0; font-weight: 500;">${itemInfo.title}</h3>
                 </div>
                 <div style="margin-bottom: 1.5em;">
-                    <label for="reportType" style="display: block; margin-bottom: 0.5em;">Type de problème:</label>
-                    <select id="reportType" class="emby-select-withcolor" style="width: 100%; padding: 0.5em; background: rgba(0,0,0,0.2); border: none; border-radius: 4px; color: inherit;">
-                        <option value="audio">Problème audio</option>
-                        <option value="subtitle">Problème de sous-titres</option>
-                        <option value="video">Problème vidéo</option>
-                        <option value="sync">Problème de synchronisation</option>
-                        <option value="other">Autre</option>
+                    <label for="reportType" style="display: block; margin-bottom: 0.5em; color: rgba(255, 255, 255, 0.7);">
+                        Type de problème:
+                    </label>
+                    <select id="reportType" class="emby-select-withcolor" style="background-color: rgb(28, 28, 28); color: white;">
+                        <option value="1">Vidéo</option>
+                        <option value="2">Audio</option>
+                        <option value="3">Sous-titre</option>
+                        <option value="4">Autre</option>
                     </select>
                 </div>
                 <div style="margin-bottom: 1.5em;">
-                    <label for="reportDescription" style="display: block; margin-bottom: 0.5em;">Description:</label>
-                    <textarea id="reportDescription" 
-                             rows="4" 
-                             style="width: 100%; padding: 0.5em; background: rgba(0,0,0,0.2); border: none; border-radius: 4px; color: inherit;"
-                             placeholder="Décrivez le problème rencontré..."></textarea>
+                    <label for="reportDescription" style="display: block; margin-bottom: 0.5em; color: rgba(255, 255, 255, 0.7);">
+                        Description:
+                    </label>
+                    <textarea id="reportDescription" rows="4" placeholder="Décrivez le problème rencontré..." style="padding-right: 1em;"></textarea>
                 </div>
-                <div style="display: flex; justify-content: flex-end; gap: 1em;">
-                    <button class="cancel-report emby-button" 
-                            style="padding: 0.5em 1em; border: none; border-radius: 4px; background: rgba(0,0,0,0.3); color: inherit;">
-                        Annuler
-                    </button>
-                    <button class="submit-report emby-button-accent emby-button" 
-                            style="padding: 0.5em 1em; border: none; border-radius: 4px;">
-                        Envoyer
-                    </button>
-                </div>
+            `,
+            onSubmit: async (modal) => {
+                const type = parseInt(modal.querySelector('#reportType').value, 10);
+                const description = modal.querySelector('#reportDescription').value;
+
+                if (!description.trim()) {
+                    showNotification('Veuillez fournir une description du problème', 'error');
+                    return;
+                }
+
+                try {
+                    await ApiClient.makeRequest('/issue', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            issueType: type,
+                            message: `Pseudo: ${itemInfo.username}\n\n${description}`,
+                            mediaId: itemInfo.mediaId
+                        })
+                    });
+
+                    showNotification('Problème signalé avec succès', 'success');
+                    modal.remove();
+                } catch (error) {
+                    console.error('Error submitting issue:', error);
+                    showNotification('Erreur lors de l\'envoi du signalement', 'error');
+                }
+            }
+        });
+    },
+
+    create() {
+        const reportButton = document.createElement('button');
+        reportButton.setAttribute('is', 'emby-button');
+        reportButton.setAttribute('type', 'button');
+        reportButton.className = 'detailButton emby-button emby-button-backdropfilter raised-backdropfilter detailButton-primary report-problem-button';
+        reportButton.style.cssText = 'margin-top: 1em !important; display: inline-flex !important; visibility: visible !important; opacity: 1 !important; width: auto !important;';
+        
+        reportButton.innerHTML = `
+            <div class="detailButton-content" style="display: flex !important; align-items: center !important;">
+                <i class="md-icon detailButton-icon button-icon button-icon-left" style="color: #ff5252;">error_outline</i>
+                <span class="button-text">Signaler un problème</span>
             </div>
         `;
 
-        // Create and show modal
-        const modalOverlay = document.createElement('div');
-        modalOverlay.className = 'report-modal-overlay';
-        modalOverlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-        `;
-        modalOverlay.innerHTML = modalContent;
-        document.body.appendChild(modalOverlay);
+        reportButton.addEventListener('click', () => this.handleReportClick());
+        return reportButton;
+    },
 
-        // Handle modal events
-        modalOverlay.querySelector('.cancel-report').addEventListener('click', () => {
-            modalOverlay.remove();
-        });
+    init() {
+        // Function to check if we should show the button
+        function showFlag() {
+            let mediaInfoPrimary = document.querySelector("div[is='emby-scroller']:not(.hide) .mediaInfoPrimary:not(.hide)");
+            let btnManualRecording = document.querySelector("div[is='emby-scroller']:not(.hide) .btnManualRecording:not(.hide)");
+            return !!mediaInfoPrimary || !!btnManualRecording;
+        }
 
-        modalOverlay.querySelector('.submit-report').addEventListener('click', () => {
-            const type = modalOverlay.querySelector('#reportType').value;
-            const description = modalOverlay.querySelector('#reportDescription').value;
-
-            if (!description.trim()) {
-                // Show error if description is empty
-                const errorMsg = document.createElement('div');
-                errorMsg.style.cssText = `
-                    color: #ff5252;
-                    margin-bottom: 1em;
-                    font-size: 0.9em;
-                `;
-                errorMsg.textContent = 'Veuillez fournir une description du problème.';
-                modalOverlay.querySelector('.submit-report').parentNode.insertBefore(
-                    errorMsg,
-                    modalOverlay.querySelector('.submit-report').parentNode.firstChild
-                );
-                return;
+        // Function to initialize the button
+        function initButton() {
+            const reportBtnsId = "ReportButtonContainer";
+            let reportBtns = document.getElementById(reportBtnsId);
+            if (reportBtns) {
+                reportBtns.remove();
             }
 
-            // TODO: Send report to backend
-            console.log('Report submitted:', { type, description, title });
+            let mainDetailButtons = document.querySelector("div[is='emby-scroller']:not(.hide) .mainDetailButtons");
+            if (!mainDetailButtons) return;
 
-            // Show success message and close modal
-            const successMsg = document.createElement('div');
-            successMsg.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 1em 2em;
-                background: rgba(76, 175, 80, 0.9);
-                color: white;
-                border-radius: 4px;
-                z-index: 1001;
-                animation: slideIn 0.3s ease-out;
-            `;
-            successMsg.textContent = 'Problème signalé avec succès';
-            document.body.appendChild(successMsg);
+            const buttonContainer = document.createElement('div');
+            buttonContainer.id = reportBtnsId;
+            buttonContainer.className = "detailButtons flex align-items-flex-start flex-wrap-wrap";
+            buttonContainer.appendChild(this.create());
 
-            setTimeout(() => {
-                successMsg.remove();
-            }, 3000);
+            mainDetailButtons.insertAdjacentElement("afterend", buttonContainer);
+        }
 
-            modalOverlay.remove();
-        });
+        // Listen for page changes
+        document.addEventListener("viewbeforeshow", (e) => {
+            if (e.detail.contextPath?.startsWith("/item?id=") || e.detail.params?.id) {
+                const mutation = new MutationObserver(() => {
+                    if (showFlag()) {
+                        initButton.call(this);
+                        mutation.disconnect();
+                    }
+                });
 
-        // Close modal when clicking outside
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) {
-                modalOverlay.remove();
+                mutation.observe(document.body, {
+                    childList: true,
+                    characterData: true,
+                    subtree: true,
+                });
             }
         });
     }

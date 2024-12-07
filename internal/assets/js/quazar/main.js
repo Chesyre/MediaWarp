@@ -6,7 +6,9 @@
         import('./api/apiClient.js'),
         import('./api/mediaApi.js'),
         import('./ui/modal.js'),
-        import('./components/requestButton.js')
+        import('./components/requestButton.js'),
+        import('./components/reportButton.js'),
+        import('./utils/favicon.js')
     ];
 
     // Load base modules in parallel
@@ -16,8 +18,10 @@
             { MediaStatus },
             { ApiClient },
             { MediaAPI },
-            { Modal },
-            { RequestButton }
+            { SearchModal },
+            { RequestButton },
+            { ReportButton },
+            { setFavicon }
         ]) => {
             // Button Management
             function addRequestButton() {
@@ -33,7 +37,7 @@
                 }
 
                 const button = RequestButton.create();
-                button.addEventListener('click', () => Modal.show());
+                button.addEventListener('click', () => SearchModal.show());
 
                 const searchButton = menuItems.querySelector('[data-action="search"]');
                 if (searchButton) {
@@ -43,33 +47,19 @@
                 }
             }
 
-            // Load report button module only when needed
-            async function loadReportButton() {
-                if (document.querySelector('.directors')) {
-                    try {
-                        const { ReportButton } = await import('./components/reportButton.js');
-                        ReportButton.init();
-                    } catch (error) {
-                        console.error('Error loading report button:', error);
-                    }
-                }
-            }
-
             // Initialize
             function init() {
                 try {
-                    Modal.init();
+                    SearchModal.init();
+                    ReportButton.init();
                     addRequestButton();
+                    setFavicon(); // Set the standard favicon
                     
-                    // Check for report button conditions
-                    loadReportButton();
-                    
-                    // Initialize report button when on item detail page
+                    // Watch for DOM changes to maintain request button
                     const observer = new MutationObserver(() => {
                         if (!document.querySelector('[data-custom="request-button"]')) {
                             addRequestButton();
                         }
-                        loadReportButton();
                     });
 
                     observer.observe(document.body, {
@@ -77,15 +67,8 @@
                         subtree: true
                     });
 
-                    window.addEventListener('hashchange', () => {
-                        addRequestButton();
-                        loadReportButton();
-                    });
-                    
-                    window.addEventListener('popstate', () => {
-                        addRequestButton();
-                        loadReportButton();
-                    });
+                    window.addEventListener('hashchange', addRequestButton);
+                    window.addEventListener('popstate', addRequestButton);
                 } catch (error) {
                     console.error('Error during initialization:', error);
                 }

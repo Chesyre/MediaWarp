@@ -1,0 +1,473 @@
+/* Theme Variables */
+:root {
+    --background-hue: 0 !important;
+    --background-saturation: 0% !important;
+    --background-lightness: 7.96% !important;
+    --theme-primary-color-hue: 1 !important;
+    --theme-primary-color-saturation: 61% !important;
+    --theme-primary-color-lightness: 49% !important;
+    --theme-text-color-hue: 0 !important;
+    --theme-text-color-saturation: 0% !important;
+    --theme-text-color-lightness: 100% !important;
+    --theme-text-color-alpha: 1 !important;
+    --theme-secondary-text-color-alpha: .6 !important;
+    --theme-accent-text-color-lightbg: #cc312f !important;
+    --theme-accent-text-color-darkbg: #cc312f !important;
+    --theme-accent-text-color: var(--theme-accent-text-color-darkbg) !important;
+    --theme-accent-text-color-darkbg-alt: #cc312f !important;
+    --theme-accent-text-color-alt: var(--theme-accent-text-color-darkbg-alt) !important;
+    --button-background-hue: var(--background-hue) !important;
+    --button-background-saturation: var(--background-saturation) !important;
+    --button-background-lightness: calc(var(--background-lightness) + 12%) !important;
+    --button-background-alpha: .7 !important;
+    --button-background-blur-lightness: var(--button-background-lightness) !important;
+    --button-background-blur-alpha: var(--button-background-alpha) !important;
+    --button-blur-backdrop-filter: none !important;
+    --card-background-hue: var(--background-hue) !important;
+    --card-background-saturation: var(--background-saturation) !important;
+    --card-background-lightness: calc(var(--background-lightness) + 12%) !important;
+    --card-background-alpha: .7 !important;
+    --input-background-hue: var(--background-hue) !important;
+    --input-background-saturation: var(--background-saturation) !important;
+    --input-background-lightness: calc(var(--background-lightness) + 12%) !important;
+    --header-background: hsl(var(--background-hue), var(--background-saturation), calc(var(--background-lightness) + 5%)) !important;
+    --header-blur-background: rgba(40, 40, 40, .7) !important;
+    --footer-background: hsl(var(--background-hue), var(--background-saturation), calc(var(--background-lightness) + 5%)) !important;
+    --line-background: hsla(var(--theme-text-color-hue), var(--theme-text-color-saturation), var(--theme-text-color-lightness), .14) !important;
+    --line-size: .08em !important;
+    --docked-drawer-background: hsla(var(--background-hue), var(--background-saturation), calc(var(--background-lightness) + 19%), .2) !important;
+    --dialog-border-width: 0 !important;
+    --focus-background-hue: 0 !important;
+    --focus-background-saturation: 0% !important;
+    --focus-background-lightness: 100% !important;
+    --focus-blur-background-lightness: 100% !important;
+    --focus-text-color-lightness: 0% !important;
+    --slider-lower-opacity: .7 !important;
+}
+
+/* Masquer les sélecteurs de thème et d'économiseur d'écran */
+.selectContainer:has(.selectTheme),
+.selectContainer.fldSettingsTheme,
+.selectContainer.autoSetting-autohide.fldAccentColor,
+.selectContainer.autoSetting-autohide.selectScreensaverContainer {
+    display: none !important;
+}
+
+/* LOGO quazar */
+.pageTitleWithDefaultLogo {
+    background-image: url(https://dl.quazar.cx/logo.png) !important;
+    min-height: 40px !important;
+    width: 135px !important;  /* Définit une largeur fixe pour le logo */
+}
+
+.app-splash {
+    background-image: url(https://dl.quazar.cx/logo.png) !important;
+}
+
+/* Pour s'assurer que le conteneur du logo a assez d'espace */
+.headerTop {
+    min-height: 70px !important;
+}
+
+.headerTitleContainer {
+    margin-top: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.emby-select>option {
+    color: #ffffff !important;
+}
+
+/* Base Theme */
+html {
+    color: hsla(var(--theme-text-color-hue),var(--theme-text-color-saturation),var(--theme-text-color-lightness),var(--theme-text-color-alpha)) !important;
+    background-color: hsl(var(--background-hue),var(--background-saturation),var(--background-lightness)) !important;
+}
+
+/* Custom Styles */
+/* 搜索页面 */
+input.searchfields-txtSearch {
+    padding: 0.6em !important;
+    padding-left: 1em !important;
+    border-radius: 30px !important;
+    background: hsla(var(--input-background-hue),var(--input-background-saturation),var(--input-background-lightness),var(--button-background-alpha)) !important;
+    color: inherit !important;
+    border: var(--line-size) solid transparent !important;
+}
+
+.searchSuggestionsList div {
+    display: inline-block !important;
+}
+
+.searchSuggestionsList a {
+    background: rgba(115, 115, 115, 0.5) !important;
+    backdrop-filter: blur(1.5em) saturate(1.8) !important;
+    border-radius: 30px !important;
+    margin: 5px !important;
+    font-size: 90% !important;
+    text-shadow: 0px 0px 10px rgba(0, 0, 0, 1) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* 媒体库内 */
+.alphaPicker.alphaPicker-vertical {
+    display: none !important;
+}
+
+@media not all and (min-width: 50em) {
+    .upcomingContainer .backdropCard.card-hoverable {
+        width: 50% !important;
+    }
+}
+
+.upcomingContainer .itemsContainer {
+    display: flex !important;
+    flex-wrap: wrap !important;
+}
+
+/* 节目界面 */
+@media all and (min-width: 50em) {
+    .backgroundContainer.itemBackgroundContainer.itemBackgroundContainer-preventbackdrop.withBackdrop {
+        background: linear-gradient(77deg,
+                rgba(0, 0, 0, 0.7) -20%,
+                rgba(0, 0, 0, 0.6) -50%,
+                rgba(0, 0, 0, 0.3) 100%) !important;
+        opacity: 1 !important;
+    }
+
+    .backdropContainer.backdropContainer-preventbackdrop {
+        transform: scale(1.05) !important;
+        filter: blur(1.8em) saturate(1.3) !important;
+    }
+}
+
+@media all and (min-width: 50em) {
+    .overview-text.readOnlyContent {
+        text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.91) !important;
+        -webkit-line-clamp: 3 !important;
+        line-clamp: 3 !important;
+    }
+
+    .layout-tv.noScrollY .overview-text.readOnlyContent {
+        -webkit-line-clamp: 2 !important;
+        line-clamp: 2 !important;
+        line-height: 1.46em !important;
+    }
+}
+
+.listItem-overview.listItemBodyText,
+.layout-tv .listItem-overview.listItemBodyText {
+    color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.scrollFrameY .cardImageContainer,
+.scrollFrameY .cardOverlayContainer,
+.scrollFrameY .listItemImage {
+    contain: layout !important;
+    border-radius: 0.75em !important;
+}
+
+.cardContent-round.defaultCardBackground {
+    border-radius: 10em !important;
+}
+
+.card-hoverable.focusable:hover .cardOverlayContainer {
+    transition: opacity 0ms ease-in-out !important;
+    box-shadow: 0 0 0 0.27em hsl(var(--theme-primary-color-hue), var(--theme-primary-color-saturation), var(--theme-primary-color-lightness)) !important;
+}
+
+.squareCard .cardOverlayContainer {
+    transform: scale(0.957) !important;
+    border-radius: 0 !important;
+}
+
+.bannerCard .cardOverlayContainer {
+    transform: scale(1) !important;
+    border-radius: 0 !important;
+}
+
+.detailImageContainer.detailImageContainer-main .cardOverlayContainer,
+.osdRemoteControlImageCardBox .cardOverlayContainer {
+    transform: scale(1) !important;
+}
+
+.flex-direction-column.darkContentContainer {
+    --button-background-alpha: 0.4 !important;
+}
+
+.layout-tv .card:focus>.cardBox-focustransform .cardContent.coveredImage {
+    border: 0.3em solid !important;
+    color: hsl(var(--theme-primary-color-hue),
+            var(--theme-primary-color-saturation),
+            var(--theme-primary-color-lightness)) !important;
+}
+
+.scrollY .card:focus .cardContent-bxsborder {
+    box-shadow: 0 0 0 0.27em hsl(var(--theme-primary-color-hue), var(--theme-primary-color-saturation), var(--theme-primary-color-lightness)) !important;
+}
+
+.scrollY .card:focus-visible .cardContent-bxsborder-fv {
+    box-shadow: 0 0 0 0.27em hsl(var(--theme-primary-color-hue), var(--theme-primary-color-saturation), var(--theme-primary-color-lightness)) !important;
+}
+
+.layout-tv .suggestions.padded-bottom-page .sectionTitle-cards {
+    margin-top: 3em !important;
+}
+
+.secondaryText.focusPreviewOverview,
+.readOnlyContent {
+    -webkit-line-clamp: 3 !important;
+    max-width: 90ch !important;
+}
+
+.focusable .mediaInfoItem:last-child {
+    width: 100% !important;
+    margin-top: 0.1em !important;
+    margin-bottom: 0.1em !important;
+    margin-left: 0.2em !important;
+}
+
+.mediaInfoItem.mediaInfoCriticRating {
+    width: max-content !important;
+}
+
+.mediaInfoItem a {
+    box-shadow: rgba(255, 255, 255, 0.4) 0 0 0 2px !important;
+    font-size: 100% !important;
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+    margin-right: 8px !important;
+    padding: 2px 8px !important;
+    border-radius: 1em !important;
+}
+
+@media all and (min-width: 50em) {
+    .darkContentContainer-item .mediaInfoItem a {
+        background: rgba(115, 115, 115, 0.5) !important;
+        backdrop-filter: blur(1.5em) saturate(1.8) !important;
+    }
+
+    .mediaInfoItem .emby-button-focusscale:focus {
+        background: rgba(255, 255, 255, 1) !important;
+    }
+}
+
+@media all and (min-width: 50em) {
+    .darkContentContainer-item .detailTrackSelect,
+    .darkContentContainer-item .detailButton {
+        background: rgba(115, 115, 115, 0.5) !important;
+        backdrop-filter: blur(1.5em) saturate(1.8) !important;
+        border-radius: 5em !important;
+    }
+
+    .emby-button-focusscale:focus {
+        background: var(--theme-primary-color) !important;
+    }
+
+    .detailButton {
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2) !important;
+    }
+}
+
+.detailButtons.mainDetailButtons .btnPlayTrailer {
+    display: none !important;
+}
+
+.tabs-viewmenubar-slider.emby-tabs-slider.scrollSliderX .emby-tab-button[data-index="3"] {
+    display: none !important;
+}
+
+.detailButton-autotext-icon.ratingbutton-icon-withrating,
+.cardOverlayButton-hover.ratingbutton-icon-withrating,
+.dataGridItemCell.ratingbutton-icon-withrating,
+.listViewUserDataButton.ratingbutton-icon-withrating {
+    color: hsl(var(--theme-primary-color-hue),
+            var(--theme-primary-color-saturation),
+            var(--theme-primary-color-lightness)) !important;
+}
+
+@media all and (min-width: 50em) {
+    .darkContentContainer-item .itemLinks .item-tag-button,
+    .darkContentContainer-item .itemTags .item-tag-button,
+    .darkContentContainer-item .splitVersionContainer .btnSplitVersions {
+        background: rgba(115, 115, 115, 0.3) !important;
+        backdrop-filter: blur(1.5em) saturate(1.8) !important;
+        box-shadow: rgba(255, 255, 255, 0.4) 0 0 0 2.3px !important;
+        border-radius: 30px !important;
+        color: #fff !important;
+        font-size: 0.93em !important;
+        margin-right: 1em !important;
+    }
+}
+
+@media all and (min-width: 50em) {
+    .darkContentContainer-item .defaultCardBackground.cardPadder-portrait,
+    div.mediaStreamPadder,
+    div.mediaStreamPadder-tv {
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5) !important;
+        background: rgba(115, 115, 115, 0) !important;
+    }
+
+    .darkContentContainer-item.cardOverlayContainer .defaultCardBackground {
+        backdrop-filter: blur(0.9em) !important;
+    }
+}
+
+/* Hide native controls */
+.mainDetailButtons,
+.trackSelections,
+.detailEndsAt {
+    display: none !important;
+}
+
+/* 播放界面 */
+@media not all and (pointer: fine) {
+    .videoOsdBottom-buttons,
+    .videoOsd-centerButtons-autolayout,
+    .videoOsd-btnPause-autolayout {
+        position: inherit !important;
+        margin-top: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        font-size: inherit !important;
+    }
+}
+
+@media all and (min-width: 20em) and (max-width: 25em) {
+    .videoOsdBottom-buttons,
+    .videoosd-transportbuttons.videoOsdBottom-buttons-right {
+        font-size: 0.9em !important;
+        margin-bottom: 0.5em !important;
+    }
+}
+
+@media all and (min-width: 40em) and (max-width: 66em) {
+    .videoOsdBottom-buttons,
+    .videoosd-transportbuttons.videoOsdBottom-buttons-right {
+        font-size: 1.2em !important;
+        margin-bottom: 0.5em !important;
+    }
+}
+
+.videoOsdBottom-buttons-remotecontrol {
+    font-size: 1.5em !important;
+}
+
+@media all and (max-width: 50em) {
+    .videoOsdBottom-buttons.videoOsdBottom-buttons-remotecontrol .videoosd-transportbuttons {
+        font-size: 0.8em !important;
+    }
+
+    .videoosd-transportbuttons.videoOsdBottom-contentbuttons.videoOsd-customFont.videoOsd-customFont-remotecontrol {
+        font-size: 0.9em !important;
+    }
+
+    .noScrollY.accent-emby:not(.transparentDocument) .btnSkipIntro.raised-backdropfilter.videoOsd-customFont {
+        bottom: 4.7em !important;
+        font-size: 1em !important;
+    }
+}
+
+.videoOsdHeader.headerTop {
+    filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 1)) !important;
+}
+
+.skinHeader.semiTransparent.headroom-scrolling::before {
+    opacity: 0 !important;
+}
+
+.videoOsdBottom-maincontrols {
+    -webkit-filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.75)) !important;
+    -moz-filter: drop-shadow(0px 0px 0px rgba(0, 0, 0, 0.75)) !important;
+}
+
+.videoOsdBottom.videoOsdBottom-video {
+    background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0)) !important;
+}
+
+.emby-slider-background .emby-slider-background-inner {
+    background: rgb(255 255 255 / 0%) !important;
+}
+
+.videoosd-tabsContainer .videoOsdBottom-tabs {
+    justify-content: flex-start !important;
+}
+
+.videoOsdBottom-tabs .videoosd-tabsslider .secondaryText {
+    color: white !important;
+    font-weight: 540 !important;
+}
+
+@media all and (max-height: 40em) and (min-width: 30em) and (hover: none) {
+    .videoOsdBottom-buttons .md-icon {
+        margin-left: 0.23em !important;
+        margin-right: 0.23em !important;
+    }
+}
+
+@media not all and (pointer: fine) {
+    .videoOsd-customFont {
+        margin-bottom: 0.7em !important;
+    }
+}
+
+.videoosd-padded-left.videoosd-padded-right .cardContent-bg-black {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.videoosd-tabcontainers .videoosd-tabBackground {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.videoosd-info-overview.secondaryText {
+    color: white !important;
+}
+
+.videoOsdText .videoOsdParentTitle:not(.videoOsdParentTitle-small) {
+    max-width: 30% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+.videoOsdText .videoOsdTitle:not(.secondaryText) {
+    max-width: 40% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+@media not all and (min-height: 30rem) and (min-width: 60rem) {
+    .videoosd-tabcontainers {
+        font-size: 60% !important;
+    }
+
+    .videoosd-tab.videoosd-itemstab.videoosd-activetab[data-index="1"] {
+        font-size: 90% !important;
+    }
+
+    .videoosd-tab.videoosd-itemstab.videoosd-activetab[data-index="2"] {
+        font-size: 90% !important;
+    }
+
+    .videoosd-tab.videoosd-itemstab.videoosd-activetab[data-index="3"] {
+        font-size: 98% !important;
+    }
+
+    .videoosd-tab.videoosd-guidetab.videoosd-activetab[data-index="4"] {
+        font-size: 120% !important;
+    }
+
+    .videoosd-info {
+        line-height: 1.2 !important;
+        font-size: 153% !important;
+    }
+
+    .videoosd-tab.videoosd-itemstab.videoosd-activetab[data-index="1"] .cardText.cardTextCentered,
+    .videoosd-tab.videoosd-itemstab.videoosd-activetab[data-index="2"] .cardText.cardTextCentered,
+    .videoosd-tab.videoosd-itemstab.videoosd-activetab[data-index="3"] .cardText.cardTextCentered,
+    .videoosd-tab.videoosd-guidetab.videoosd-activetab[data-index="4"] {
+        font-size: 160% !important;
+    }
+}
