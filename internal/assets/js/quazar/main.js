@@ -8,6 +8,7 @@
         import('./ui/modal.js'),
         import('./components/requestButton.js'),
         import('./components/reportButton.js'),
+        import('./components/howItWorksButton.js'),
         import('./utils/favicon.js')
     ];
 
@@ -21,29 +22,36 @@
             { SearchModal },
             { RequestButton },
             { ReportButton },
+            { HowItWorksButton },
             { setFavicon }
         ]) => {
             // Button Management
-            function addRequestButton() {
-                const existingButton = document.querySelector('[data-custom="request-button"]');
-                if (existingButton) {
-                    existingButton.remove();
-                }
-
+            function addButtons() {
                 const menuItems = document.querySelector('.navDrawerItemsContainer');
                 if (!menuItems) {
-                    setTimeout(addRequestButton, 1000);
+                    setTimeout(addButtons, 1000);
                     return;
                 }
 
-                const button = RequestButton.create();
-                button.addEventListener('click', () => SearchModal.show());
+                // Remove existing buttons
+                const existingButtons = menuItems.querySelectorAll('[data-custom]');
+                existingButtons.forEach(button => button.remove());
 
+                // Add request button
+                const requestButton = RequestButton.create();
+                requestButton.addEventListener('click', () => SearchModal.show());
+
+                // Add how it works button
+                const howItWorksButton = HowItWorksButton.create();
+
+                // Insert buttons
                 const searchButton = menuItems.querySelector('[data-action="search"]');
                 if (searchButton) {
-                    searchButton.parentNode.insertBefore(button, searchButton.nextSibling);
+                    searchButton.parentNode.insertBefore(howItWorksButton, searchButton.nextSibling);
+                    searchButton.parentNode.insertBefore(requestButton, howItWorksButton);
                 } else {
-                    menuItems.appendChild(button);
+                    menuItems.appendChild(requestButton);
+                    menuItems.appendChild(howItWorksButton);
                 }
             }
 
@@ -52,13 +60,13 @@
                 try {
                     SearchModal.init();
                     ReportButton.init();
-                    addRequestButton();
-                    setFavicon(); // Set the standard favicon
+                    addButtons();
+                    setFavicon();
                     
-                    // Watch for DOM changes to maintain request button
+                    // Watch for DOM changes to maintain buttons
                     const observer = new MutationObserver(() => {
-                        if (!document.querySelector('[data-custom="request-button"]')) {
-                            addRequestButton();
+                        if (!document.querySelector('[data-custom]')) {
+                            addButtons();
                         }
                     });
 
@@ -67,8 +75,8 @@
                         subtree: true
                     });
 
-                    window.addEventListener('hashchange', addRequestButton);
-                    window.addEventListener('popstate', addRequestButton);
+                    window.addEventListener('hashchange', addButtons);
+                    window.addEventListener('popstate', addButtons);
                 } catch (error) {
                     console.error('Error during initialization:', error);
                 }

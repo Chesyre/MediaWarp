@@ -73,7 +73,6 @@ export const ReportButton = {
                 try {
                     await ApiClient.makeRequest('/issue', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             issueType: type,
                             message: `Pseudo: ${itemInfo.username}\n\n${description}`,
@@ -109,39 +108,39 @@ export const ReportButton = {
         return reportButton;
     },
 
+    addReportButton() {
+        const reportBtnsId = "ReportButtonContainer";
+        let reportBtns = document.getElementById(reportBtnsId);
+        if (reportBtns) {
+            reportBtns.remove();
+        }
+
+        const mainDetailButtons = document.querySelector("div[is='emby-scroller']:not(.hide) .mainDetailButtons");
+        if (!mainDetailButtons) {
+            setTimeout(() => this.addReportButton(), 1000);
+            return;
+        }
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.id = reportBtnsId;
+        buttonContainer.className = "detailButtons flex align-items-flex-start flex-wrap-wrap";
+        buttonContainer.appendChild(this.create());
+
+        mainDetailButtons.insertAdjacentElement("afterend", buttonContainer);
+    },
+
     init() {
-        // Function to check if we should show the button
         function showFlag() {
-            let mediaInfoPrimary = document.querySelector("div[is='emby-scroller']:not(.hide) .mediaInfoPrimary:not(.hide)");
-            let btnManualRecording = document.querySelector("div[is='emby-scroller']:not(.hide) .btnManualRecording:not(.hide)");
+            const mediaInfoPrimary = document.querySelector("div[is='emby-scroller']:not(.hide) .mediaInfoPrimary:not(.hide)");
+            const btnManualRecording = document.querySelector("div[is='emby-scroller']:not(.hide) .btnManualRecording:not(.hide)");
             return !!mediaInfoPrimary || !!btnManualRecording;
         }
 
-        // Function to initialize the button
-        function initButton() {
-            const reportBtnsId = "ReportButtonContainer";
-            let reportBtns = document.getElementById(reportBtnsId);
-            if (reportBtns) {
-                reportBtns.remove();
-            }
-
-            let mainDetailButtons = document.querySelector("div[is='emby-scroller']:not(.hide) .mainDetailButtons");
-            if (!mainDetailButtons) return;
-
-            const buttonContainer = document.createElement('div');
-            buttonContainer.id = reportBtnsId;
-            buttonContainer.className = "detailButtons flex align-items-flex-start flex-wrap-wrap";
-            buttonContainer.appendChild(this.create());
-
-            mainDetailButtons.insertAdjacentElement("afterend", buttonContainer);
-        }
-
-        // Listen for page changes
         document.addEventListener("viewbeforeshow", (e) => {
             if (e.detail.contextPath?.startsWith("/item?id=") || e.detail.params?.id) {
                 const mutation = new MutationObserver(() => {
                     if (showFlag()) {
-                        initButton.call(this);
+                        this.addReportButton();
                         mutation.disconnect();
                     }
                 });
@@ -153,5 +152,9 @@ export const ReportButton = {
                 });
             }
         });
+
+        if (window.location.hash.includes('/item?id=')) {
+            this.addReportButton();
+        }
     }
 };

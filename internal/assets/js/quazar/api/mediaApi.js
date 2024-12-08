@@ -4,6 +4,7 @@ import { ApiClient } from './apiClient.js';
 export const MediaAPI = {
     async getMediaStatus(mediaId, mediaType) {
         try {
+            await ApiClient.authenticate();
             const endpoint = `/${mediaType.toLowerCase()}/${mediaId}`;
             const response = await ApiClient.makeRequest(endpoint);
             return response?.mediaInfo?.status || MediaStatus.NOT_AVAILABLE;
@@ -15,6 +16,7 @@ export const MediaAPI = {
 
     async getTVDetails(tvId) {
         try {
+            await ApiClient.authenticate();
             return await ApiClient.makeRequest(`/tv/${tvId}`);
         } catch (error) {
             console.error('Erreur lors de la récupération des détails de la série:', error);
@@ -29,9 +31,9 @@ export const MediaAPI = {
             case MediaStatus.PENDING:
                 return { label: 'Déjà demandé', class: 'pending', requestable: false };
             case MediaStatus.PROCESSING:
-                return { label: 'En cours de traitement', class: 'processing', requestable: false };
+                return { label: 'En traitement', class: 'processing', requestable: false };
             case MediaStatus.PARTIALLY_AVAILABLE:
-                return { label: 'Partiellement disponible', class: 'partial', requestable: true };
+                return { label: 'En partie', class: 'partial', requestable: true };
             default:
                 return { label: 'Non disponible', class: 'not-available', requestable: true };
         }
@@ -39,6 +41,7 @@ export const MediaAPI = {
 
     async searchMedia(query) {
         try {
+            await ApiClient.authenticate();
             const data = await ApiClient.makeRequest(`/search?query=${encodeURIComponent(query)}`);
             
             if (!data?.results?.length) {
@@ -74,6 +77,7 @@ export const MediaAPI = {
 
     async requestMedia(mediaId, mediaType) {
         try {
+            await ApiClient.authenticate();
             const numericMediaId = parseInt(mediaId, 10);
             if (isNaN(numericMediaId)) {
                 throw new Error('L\'ID du média doit être un nombre valide');
@@ -100,7 +104,6 @@ export const MediaAPI = {
 
             return await ApiClient.makeRequest('/request', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody)
             });
         } catch (error) {
