@@ -11,7 +11,6 @@ export const ReportButton = {
             if (!itemId) return null;
 
             const item = await window.ApiClient.getItem(userId, itemId);
-            const userInfo = await window.ApiClient.getUser(userId);
             const tmdbId = item.ProviderIds?.Tmdb || item.ProviderIds?.tmdb;
             
             if (!tmdbId) return null;
@@ -21,7 +20,6 @@ export const ReportButton = {
             
             return {
                 title: item.Name,
-                username: userInfo?.Name || 'Utilisateur inconnu',
                 mediaId: jellyseerrResponse?.mediaInfo?.id
             };
         } catch (error) {
@@ -75,7 +73,7 @@ export const ReportButton = {
                         method: 'POST',
                         body: JSON.stringify({
                             issueType: type,
-                            message: `Pseudo: ${itemInfo.username}\n\n${description}`,
+                            message: description,
                             mediaId: itemInfo.mediaId
                         })
                     });

@@ -1,4 +1,5 @@
 import { CONFIG } from '../config/config.js';
+import { JellyseerrAuth } from './jellyseerrAuth.js';
 
 export const ApiClient = {
     async makeRequest(endpoint, options = {}) {
@@ -11,6 +12,12 @@ export const ApiClient = {
                 },
                 credentials: 'include'
             };
+
+            // Add auth token if available
+            const authToken = JellyseerrAuth.getAuthToken();
+            if (authToken) {
+                defaultOptions.headers['X-Auth-Token'] = authToken;
+            }
 
             const response = await fetch(`${CONFIG.JELLYSEERR_API_URL}${endpoint}`, {
                 ...defaultOptions,

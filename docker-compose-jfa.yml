@@ -1,0 +1,22 @@
+services:
+  nginx-jfa:
+    build:
+      context: .
+      dockerfile: nginx-jfa.Dockerfile
+    ports:
+      - "4000:80"
+    depends_on:
+      - jfa
+
+  jfa:
+    image: hrfee/jfa-go:latest
+    container_name: jfa
+    ports:
+      - "8056:8056"
+    volumes:
+      - jfa:/data
+    restart: unless-stopped
+
+volumes:
+  jfa:
+    external: true
