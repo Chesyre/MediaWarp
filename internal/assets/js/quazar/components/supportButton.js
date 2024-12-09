@@ -27,6 +27,7 @@ export const SupportButton = {
 
     async showSupportModal() {
         try {
+            await ApiClient.authenticate();
             const [issues, counts] = await Promise.all([
                 ApiClient.makeRequest('/issue?take=50'),
                 ApiClient.makeRequest('/issue/count')
@@ -35,20 +36,33 @@ export const SupportButton = {
             createModal({
                 title: 'Support',
                 content: `
-                    <div class="modal-content-custom">
-                        <div class="modal-header-stats">
-                            <div class="stat-badge">
-                                <i class="md-icon">pending</i>
-                                <span>${counts.open} ouverts</span>
+                    <div class="support-modal">
+                        <div class="how-it-works-section">
+                            <h3><i class="md-icon">analytics</i> Vue d'ensemble</h3>
+                            <div class="stats-container">
+                                <div class="stat-item">
+                                    <i class="md-icon">pending</i>
+                                    <div class="stat-details">
+                                        <div class="stat-label">En cours</div>
+                                        <div class="stat-value">${counts.open}</div>
+                                    </div>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="md-icon">check_circle</i>
+                                    <div class="stat-details">
+                                        <div class="stat-label">Résolus</div>
+                                        <div class="stat-value">${counts.closed}</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="stat-badge">
-                                <i class="md-icon">check_circle</i>
-                                <span>${counts.closed} résolus</span>
-                            </div>
+                        </div>
+
+                        <div class="how-it-works-section">
+                            <h3><i class="md-icon">filter_list</i> Filtres</h3>
                             <div class="filter-container">
                                 <select id="issueStatusFilter" class="emby-select-withcolor">
                                     <option value="all">Tous les statuts</option>
-                                    <option value="open" selected>Ouverts</option>
+                                    <option value="open" selected>En cours</option>
                                     <option value="resolved">Résolus</option>
                                 </select>
                                 <select id="issueTypeFilter" class="emby-select-withcolor">
@@ -61,52 +75,91 @@ export const SupportButton = {
                             </div>
                         </div>
 
-                        <div class="issues-container">
-                            ${this.renderIssuesList(issues.results)}
+                        <div class="how-it-works-section">
+                            <h3><i class="md-icon">list</i> Problèmes signalés</h3>
+                            <div class="issues-container">
+                                ${this.renderIssuesList(issues.results)}
+                            </div>
                         </div>
                     </div>
                 `,
                 customStyles: `
-                    .modal-content-custom {
+                    .support-modal {
                         max-width: 1200px;
                         margin: 0 auto;
                     }
 
-                    .modal-header-stats {
+                    .how-it-works-section {
+                        margin-bottom: 2em;
+                        padding: 1.5em;
+                        background: rgba(0, 0, 0, 0.2);
+                        border-radius: 15px;
+                    }
+
+                    .how-it-works-section:last-child {
+                        margin-bottom: 0;
+                    }
+
+                    .how-it-works-section h3 {
                         display: flex;
                         align-items: center;
+                        gap: 0.5em;
+                        margin: 0 0 1em 0;
+                        color: var(--theme-primary-color);
+                        font-size: 1.3em;
+                    }
+
+                    .stats-container {
+                        display: flex;
                         gap: 1em;
-                        margin-bottom: 2em;
                         flex-wrap: wrap;
                     }
 
-                    .stat-badge {
-                        display: inline-flex;
+                    .stat-item {
+                        flex: 1;
+                        min-width: 200px;
+                        display: flex;
                         align-items: center;
-                        gap: 0.5em;
-                        padding: 0.6em 1.2em;
+                        gap: 1em;
+                        padding: 1em;
                         background: rgba(0, 0, 0, 0.2);
-                        border-radius: 30px;
-                        color: rgba(255, 255, 255, 0.9);
+                        border-radius: 10px;
                     }
 
-                    .stat-badge i {
+                    .stat-item i {
+                        font-size: 2em;
                         color: var(--theme-primary-color);
                     }
 
+                    .stat-details {
+                        flex: 1;
+                    }
+
+                    .stat-label {
+                        color: rgba(255, 255, 255, 0.7);
+                        font-size: 0.9em;
+                    }
+
+                    .stat-value {
+                        font-size: 1.8em;
+                        font-weight: 500;
+                        color: white;
+                    }
+
                     .filter-container {
-                        margin-left: auto;
                         display: flex;
                         gap: 1em;
+                        margin-bottom: 1em;
                     }
 
                     .filter-container select {
+                        flex: 1;
                         background: rgba(0, 0, 0, 0.2);
                         border: none;
-                        border-radius: 30px;
-                        padding: 0.6em 1.2em;
+                        border-radius: 10px;
+                        padding: 0.8em 1em;
                         color: white;
-                        min-width: 150px;
+                        min-width: 200px;
                     }
 
                     .issues-container {
@@ -347,7 +400,7 @@ export const SupportButton = {
                                 </div>
                                 <span class="issue-status-badge ${issue.status === 'open' ? 'open' : 'resolved'}">
                                     <i class="md-icon">${issue.status === 'open' ? 'pending' : 'check_circle'}</i>
-                                    ${issue.status === 'open' ? 'Ouvert' : 'Résolu'}
+                                    ${issue.status === 'open' ? 'En cours' : 'Résolu'}
                                 </span>
                             </div>
                         </div>
@@ -367,238 +420,5 @@ export const SupportButton = {
                 </div>
             `;
         }).join('');
-    },
-
-
-    async showIssueDetails(issueId) {
-        try {
-            const issue = await ApiClient.makeRequest(`/issue/${issueId}`);
-            
-            createModal({
-                title: `Détails du problème - ${issue.media?.title || 'Sans titre'}`,
-                content: `
-                    <div class="issue-details">
-                        <div class="issue-details-header">
-                            <div class="media-info">
-                                <img src="https://image.tmdb.org/t/p/w154${issue.media?.posterPath}" 
-                                     alt="" 
-                                     class="media-poster-large">
-                                <div class="media-info-text">
-                                    <h3>${issue.media?.title || 'Sans titre'}</h3>
-                                    <div class="media-meta">
-                                        ${issue.media?.releaseDate ? `
-                                            <span>${new Date(issue.media.releaseDate).getFullYear()}</span>
-                                        ` : ''}
-                                        ${issue.media?.runtime ? `
-                                            <span>${Math.floor(issue.media.runtime / 60)}h ${issue.media.runtime % 60}m</span>
-                                        ` : ''}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="issue-meta">
-                                <span class="issue-status ${issue.status === 'open' ? 'open' : 'resolved'}">
-                                    <i class="md-icon">${issue.status === 'open' ? 'pending' : 'check_circle'}</i>
-                                    ${issue.status === 'open' ? 'Ouvert' : 'Résolu'}
-                                </span>
-                                <div class="issue-type">
-                                    <i class="md-icon">${this.getIssueTypeLabel(issue.issueType).icon}</i>
-                                    ${this.getIssueTypeLabel(issue.issueType).label}
-                                </div>
-                                <div class="issue-date">
-                                    <i class="md-icon">calendar_today</i>
-                                    ${this.formatDate(issue.createdAt)}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="issue-content">
-                            <h4>Description</h4>
-                            <p class="issue-description">${issue.message}</p>
-                            
-                            <h4>Commentaires (${issue.comments?.length || 0})</h4>
-                            <div class="comments-list">
-                                ${this.renderComments(issue.comments)}
-                            </div>
-                            
-                            <div class="comment-form">
-                                <textarea id="newComment" placeholder="Ajouter un commentaire..." rows="3"></textarea>
-                                <button class="submit-comment">
-                                    <i class="md-icon">send</i>
-                                    Envoyer
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `,
-                customStyles: `
-                    .issue-details {
-                        max-width: 800px;
-                        margin: 0 auto;
-                    }
-
-                    .issue-details-header {
-                        margin-bottom: 2em;
-                        padding-bottom: 2em;
-                        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-                    }
-
-                    .media-info {
-                        display: flex;
-                        gap: 2em;
-                        margin-bottom: 1.5em;
-                    }
-
-                    .media-poster-large {
-                        width: 154px;
-                        height: 231px;
-                        border-radius: 10px;
-                        object-fit: cover;
-                    }
-
-                    .media-info-text {
-                        flex: 1;
-                    }
-
-                    .media-info-text h3 {
-                        margin: 0 0 0.5em 0;
-                        font-size: 1.5em;
-                        color: white;
-                    }
-
-                    .media-meta {
-                        display: flex;
-                        gap: 1em;
-                        color: rgba(255, 255, 255, 0.7);
-                    }
-
-                    .issue-meta {
-                        display: flex;
-                        gap: 1em;
-                        flex-wrap: wrap;
-                    }
-
-                    .issue-content h4 {
-                        margin: 1.5em 0 1em 0;
-                        color: white;
-                        font-size: 1.1em;
-                    }
-
-                    .issue-description {
-                        background: rgba(0, 0, 0, 0.2);
-                        padding: 1.5em;
-                        border-radius: 10px;
-                        margin: 0;
-                        line-height: 1.6;
-                    }
-
-                    .comments-list {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 1em;
-                        margin-bottom: 1.5em;
-                    }
-
-                    .comment {
-                        background: rgba(0, 0, 0, 0.2);
-                        padding: 1.5em;
-                        border-radius: 10px;
-                    }
-
-                    .comment-header {
-                        display: flex;
-                        justify-content: space-between;
-                        margin-bottom: 1em;
-                    }
-
-                    .comment-author {
-                        font-weight: 500;
-                        color: white;
-                    }
-
-                    .comment-date {
-                        color: rgba(255, 255, 255, 0.5);
-                        font-size: 0.9em;
-                    }
-
-                    .comment-content {
-                        line-height: 1.6;
-                    }
-
-                    .comment-form {
-                        margin-top: 2em;
-                    }
-
-                    .comment-form textarea {
-                        width: 100%;
-                        background: rgba(0, 0, 0, 0.2);
-                        border: 1px solid rgba(255, 255, 255, 0.1);
-                        border-radius: 10px;
-                        padding: 1em;
-                        color: white;
-                        resize: vertical;
-                        margin-bottom: 1em;
-                    }
-
-                    .submit-comment {
-                        background: var(--theme-primary-color);
-                        border: none;
-                        border-radius: 20px;
-                        padding: 0.8em 1.5em;
-                        color: white;
-                        cursor: pointer;
-                        transition: opacity 0.2s;
-                        display: inline-flex;
-                        align-items: center;
-                        gap: 0.5em;
-                    }
-
-                    .submit-comment:hover {
-                        opacity: 0.9;
-                    }
-                `
-            });
-
-            // Add comment form handler
-            const commentForm = document.querySelector('.comment-form');
-            const commentInput = document.getElementById('newComment');
-
-            commentForm.querySelector('.submit-comment').addEventListener('click', async () => {
-                const message = commentInput.value.trim();
-                if (!message) return;
-
-                try {
-                    await ApiClient.makeRequest(`/issue/${issueId}/comment`, {
-                        method: 'POST',
-                        body: JSON.stringify({ message })
-                    });
-
-                    // Refresh issue details
-                    this.showIssueDetails(issueId);
-                } catch (error) {
-                    console.error('Error adding comment:', error);
-                    showNotification('Erreur lors de l\'ajout du commentaire', 'error');
-                }
-            });
-
-        } catch (error) {
-            console.error('Error loading issue details:', error);
-            showNotification('Erreur lors du chargement des détails', 'error');
-        }
-    },
-
-    renderComments(comments = []) {
-        if (!comments.length) {
-            return '<div class="no-comments">Aucun commentaire</div>';
-        }
-
-        return comments.map(comment => `
-            <div class="comment">
-                <div class="comment-header">
-                    <span class="comment-author">${comment.user.username}</span>
-                    <span class="comment-date">${this.formatDate(comment.createdAt)}</span>
-                </div>
-                <div class="comment-content">${comment.message}</div>
-            </div>
-        `).join('');
     }
 };
